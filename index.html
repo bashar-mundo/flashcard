@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Audio Flashcards — Minimal</title>
+  <meta name="description" content="Minimal mobile flashcards for pro audio recording terms." />
+  <style>
+    :root {
+      --accent: #FF6038;
+      --accent-soft: rgba(255,96,56,.14);
+      --bg: #0e0f12;
+      --card: #17191d;
+      --card-2: #1d2025;
+      --text: #f6f3ef;
+      --muted: #b5b0aa;
+      --line: rgba(255,255,255,.08);
+      --radius: 24px;
+      --shadow: 0 18px 40px rgba(0,0,0,.28);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(255,96,56,.09), transparent 36%),
+        linear-gradient(180deg, #111317 0%, #0d0f12 100%);
+      color: var(--text);
+    }
+
+    .app {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px 28px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 520px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: .95rem;
+      padding: 0 2px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--line);
+      font-weight: 700;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(255,96,56,.12);
+    }
+
+    .card-wrap {
+      perspective: 1200px;
+    }
+
+    .flashcard {
+      position: relative;
+      width: 100%;
+      min-height: 68dvh;
+      transform-style: preserve-3d;
+      transition: transform .55s cubic-bezier(.2,.8,.2,1);
+      cursor: pointer;
+    }
+
+    .flashcard.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .side {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015)),
+        linear-gradient(135deg, rgba(255,96,56,.05), transparent 32%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .back {
+      transform: rotateY(180deg);
+    }
+
+    .inner {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 22px;
+    }
+
+    .category {
+      color: var(--accent);
+      font-size: .82rem;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .term {
+      margin: 0 0 10px 0;
+      font-size: clamp(2rem, 10vw, 4.15rem);
+      line-height: .95;
+      letter-spacing: -.05em;
+      text-wrap: balance;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: 22px;
+    }
+
+    .hint {
+      font-size: clamp(1.1rem, 4.1vw, 1.35rem);
+      line-height: 1.45;
+      color: #fff7f4;
+      background: var(--accent-soft);
+      border: 1px solid rgba(255,96,56,.18);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .back .term {
+      font-size: clamp(1.7rem, 7vw, 2.4rem);
+      margin-bottom: 18px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .item {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .label {
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--accent);
+      font-weight: 800;
+      margin-bottom: 7px;
+    }
+
+    .item p {
+      margin: 0;
+      line-height: 1.45;
+      color: #f2ede8;
+    }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-top: 1px solid var(--line);
+      padding: 14px 18px 16px;
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 18px;
+      padding: 16px 18px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .15s ease, opacity .15s ease, background .15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .btn-secondary {
+      background: #22252a;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 10px 28px rgba(255,96,56,.22);
+    }
+
+    .mini-progress {
+      text-align: center;
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    .mini-progress b {
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (min-width: 700px) {
+      .flashcard {
+        min-height: 620px;
+      }
+      .inner {
+        padding: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <main class="wrap">
+      <div class="top">
+        <div class="pill"><span class="dot"></span> Audio Flashcards</div>
+        <div id="counter">1 / 1</div>
+      </div>
+
+      <div class="card-wrap">
+        <article class="flashcard" id="card" tabindex="0" aria-label="Flashcard. Tap to flip.">
+          <section class="side front">
+            <div class="inner">
+              <div class="category" id="frontCategory">Category</div>
+              <h1 class="term" id="frontTerm">SNR</h1>
+              <div class="subtitle" id="frontSubtitle">Signal-to-Noise Ratio</div>
+              <div class="hint" id="frontHint">How much louder is speech than background noise?</div>
+            </div>
+            <div class="footer">Tap card to flip</div>
+          </section>
+
+          <section class="side back">
+            <div class="inner">
+              <div class="category" id="backCategory">Category</div>
+              <h2 class="term" id="backTerm">SNR</h2>
+              <div class="stack">
+                <div class="item">
+                  <div class="label">Meaning</div>
+                  <p id="definition"></p>
+                </div>
+                <div class="item">
+                  <div class="label">Target / Spec</div>
+                  <p id="target"></p>
+                </div>
+                <div class="item">
+                  <div class="label">Memory Cue</div>
+                  <p id="memory"></p>
+                </div>
+                <div class="item">
+                  <div class="label">Avoid</div>
+                  <p id="avoid"></p>
+                </div>
+              </div>
+            </div>
+            <div class="footer">Tap card to go back</div>
+          </section>
+        </article>
+      </div>
+
+      <div class="controls">
+        <button class="btn-secondary" id="prev">← Previous</button>
+        <button class="btn-primary" id="next">Next →</button>
+      </div>
+
+      <div class="mini-progress">Card <b id="progress">1</b> of <b id="total">1</b></div>
+    </main>
+  </div>
+
+  <script>
+    const CARDS = [{"category": "Noise & Signal Quality", "term": "SNR", "subtitle": "Signal-to-Noise Ratio", "front_hint": "How much louder is speech than background noise?", "definition": "The ratio between the speech level and the background noise level, measured in dB.", "target": "Target for clean TTS: ≥ 40 dB", "memory": "Think: clear voice sitting far above the noise.", "avoid": "Do not confuse SNR with the noise floor."}, {"category": "Noise & Signal Quality", "term": "Noise Floor", "subtitle": "Residual background noise", "front_hint": "How noisy is the room when nobody talks?", "definition": "The absolute level of background noise when no one is speaking, measured in dBFS.", "target": "Target: ≤ −60 dBFS", "memory": "Think: the room should sound almost empty.", "avoid": "Lower is better."}, {"category": "Noise & Signal Quality", "term": "Self-noise", "subtitle": "Mic / preamp noise", "front_hint": "Noise created by the recording gear itself.", "definition": "Noise generated internally by the microphone or preamp, often specified as equivalent noise level in dBA.", "target": "Important for quiet, intimate voice recordings.", "memory": "Even a silent room can sound noisy if the mic is noisy.", "avoid": "Cheap gear may raise the noise floor."}, {"category": "Room Acoustics", "term": "Reverb / RT60", "subtitle": "Sound decay in the room", "front_hint": "Does the voice linger after speaking?", "definition": "Reverberation is sound reflecting around the room after the source stops. RT60 measures how long it takes to decay by 60 dB.", "target": "For dry TTS: RT60 < 0.3 s", "memory": "Dry room = short tail after the voice.", "avoid": "Too much reverb makes speech less clean for training."}, {"category": "Room Acoustics", "term": "Early Reflections", "subtitle": "First echoes", "front_hint": "Tiny echoes right after the direct voice.", "definition": "The first sound reflections, usually within about 50 ms, that arrive after the direct sound.", "target": "Minimize with treatment and mic placement.", "memory": "They blur clarity even when the room does not sound very echoey.", "avoid": "Hard walls, tables, glass, and corners."}, {"category": "Room Acoustics", "term": "Room Tone", "subtitle": "Ambience", "front_hint": "The room's fingerprint when nobody speaks.", "definition": "The characteristic background sound of an empty room.", "target": "Record a few seconds for reference.", "memory": "Every room has a sound signature.", "avoid": "Do not treat it as the same thing as SNR."}, {"category": "Recording Format & Levels", "term": "Sample Rate", "subtitle": "Samples per second", "front_hint": "How often is the audio measured?", "definition": "The number of audio samples captured per second, measured in Hz or kHz.", "target": "Capture at 48 kHz; downsample later if needed.", "memory": "48 kHz is the safe studio capture standard.", "avoid": "Do not record directly at a low target rate if you can avoid it."}, {"category": "Recording Format & Levels", "term": "Bit Depth", "subtitle": "Resolution per sample", "front_hint": "How finely is volume stored?", "definition": "The resolution of each audio sample. Higher bit depth gives more headroom while recording.", "target": "Record at 24-bit WAV.", "memory": "24-bit gives you breathing room.", "avoid": "16-bit is okay for delivery, not ideal for capture."}, {"category": "Recording Format & Levels", "term": "Format", "subtitle": "File type", "front_hint": "Is the audio compressed or raw?", "definition": "The audio file container/encoding used to store the recording.", "target": "Use WAV or FLAC.", "memory": "WAV/FLAC preserve training data.", "avoid": "Avoid MP3/AAC because lossy compression adds artifacts."}, {"category": "Recording Format & Levels", "term": "Headroom", "subtitle": "Safety margin below 0 dBFS", "front_hint": "Leave space for loud syllables.", "definition": "The margin between the loudest peaks and digital maximum level, 0 dBFS.", "target": "Peaks around −6 to −3 dBFS.", "memory": "Leave room so the voice does not hit the ceiling.", "avoid": "No clipping. Clipped audio is usually unusable."}, {"category": "Recording Format & Levels", "term": "Clipping", "subtitle": "Distortion from overload", "front_hint": "When audio hits 0 dBFS and breaks.", "definition": "Clipping happens when the signal exceeds the recording limit, flattening peaks and causing distortion.", "target": "Avoid completely.", "memory": "Flat-top waveform = danger.", "avoid": "Lower gain before recording; do not rely on fixing it later."}, {"category": "Recording Format & Levels", "term": "LUFS", "subtitle": "Perceived loudness", "front_hint": "How loud does it feel?", "definition": "A perceptual loudness standard useful for consistent normalization across a dataset.", "target": "Use for dataset consistency, not as the main recording-quality metric.", "memory": "LUFS helps files feel equally loud.", "avoid": "Do not normalize destructively before saving raw data."}, {"category": "Mic & Capture", "term": "Polar Pattern", "subtitle": "Mic directionality", "front_hint": "Where does the mic listen?", "definition": "The direction from which a microphone captures sound, such as cardioid, omni, or figure-8.", "target": "Cardioid is common for voice.", "memory": "Cardioid listens mostly from the front.", "avoid": "Wrong pattern can capture too much room noise."}, {"category": "Mic & Capture", "term": "Plosives", "subtitle": "P / B pops", "front_hint": "Air bursts hitting the mic.", "definition": "Low-frequency pops caused by bursts of air from sounds like p and b.", "target": "Use pop filter and good mic angle.", "memory": "P and B push air.", "avoid": "Do not point the mouth directly into the capsule too close."}, {"category": "Mic & Capture", "term": "Sibilance", "subtitle": "Harsh S sounds", "front_hint": "Sharp hiss from s / sh sounds.", "definition": "High-frequency harshness from sounds such as s, sh, and sometimes z.", "target": "Control with mic placement; minimal processing for ML.", "memory": "Sibilance is the sharp edge of speech.", "avoid": "Avoid heavy de-essing if raw training data is required."}, {"category": "Mic & Capture", "term": "Proximity Effect", "subtitle": "Bass boost when close", "front_hint": "Closer directional mic = more bass.", "definition": "A bass increase that happens when a speaker is very close to a directional microphone.", "target": "Keep distance consistent.", "memory": "Close voice sounds bigger and bassier.", "avoid": "Changing distance changes tone across the dataset."}, {"category": "Mic & Capture", "term": "Mono vs Stereo", "subtitle": "One channel vs two channels", "front_hint": "How many audio channels?", "definition": "Mono uses one channel. Stereo uses two channels. Multi-channel can isolate speakers.", "target": "TTS is usually mono; conversations may need isolated channels.", "memory": "One speaker TTS = mono. Multiple speakers = consider separate channels.", "avoid": "Do not record stereo just because it sounds more spacious."}, {"category": "Processing", "term": "Raw / Dry / Flat", "subtitle": "Preferred for ML training", "front_hint": "Clean capture without studio coloring.", "definition": "Audio with no compression, EQ, noise reduction, normalization, or reverb applied.", "target": "Ask for raw capture.", "memory": "Let the model learn the real clean signal.", "avoid": "Do not let the studio polish the only copy."}, {"category": "Processing", "term": "Compression", "subtitle": "Dynamic range control", "front_hint": "Makes loud/quiet parts more even.", "definition": "Processing that reduces dynamic range by controlling loud peaks and raising perceived loudness.", "target": "Usually avoid for raw ML training data.", "memory": "Compression changes the natural shape of speech.", "avoid": "Do not bake it into the raw files."}, {"category": "Processing", "term": "EQ", "subtitle": "Tone shaping", "front_hint": "Boosts or cuts frequencies.", "definition": "Equalization changes the balance of frequencies, such as bass, mids, and treble.", "target": "Avoid unless a processed copy is requested.", "memory": "EQ colors the voice.", "avoid": "Different EQ settings can make data inconsistent."}, {"category": "Processing", "term": "Noise Reduction", "subtitle": "Algorithmic cleanup", "front_hint": "Removes noise but may add artifacts.", "definition": "Processing that attempts to remove background noise from audio.", "target": "Avoid for raw training data.", "memory": "Noise reduction can leave hidden fingerprints.", "avoid": "Better to record cleanly than repair later."}, {"category": "Studio Specs", "term": "Studio Delivery", "subtitle": "What to ask for", "front_hint": "The exact checklist to send the studio.", "definition": "Your requested technical delivery format and recording constraints.", "target": "48 kHz, 24-bit, mono WAV; SNR ≥ 40 dB; noise floor ≤ −60 dBFS; RT60 < 0.3s; peaks ≤ −3 dBFS.", "memory": "Format + silence + room + levels.", "avoid": "Do not assume the studio knows ML training needs."}, {"category": "Studio Specs", "term": "Consistent Setup", "subtitle": "Same mic, distance, room, gain", "front_hint": "Keep sessions comparable.", "definition": "Using the same recording chain and placement across all speakers and sessions.", "target": "Same mic distance/setup across all sessions.", "memory": "Consistency beats fancy changes.", "avoid": "Do not change mic, distance, room, or processing mid-dataset."}, {"category": "Studio Specs", "term": "Metadata", "subtitle": "Labels for every file", "front_hint": "Know exactly what each file contains.", "definition": "Structured information such as speaker ID, take number, transcript, session, and channel.", "target": "Use a clear slate/labeling convention.", "memory": "Good audio without metadata becomes hard to use.", "avoid": "Do not rely on memory or random filenames."}, {"category": "Conversational / Multimodal", "term": "Synchronization", "subtitle": "Audio-video alignment", "front_hint": "Do audio and video match in time?", "definition": "Ensuring audio, video, and annotations line up using timestamps or timecode.", "target": "Require audio-to-video timecode alignment.", "memory": "Bad sync breaks multimodal learning.", "avoid": "Do not align manually later without time references."}, {"category": "Conversational / Multimodal", "term": "Turn-taking", "subtitle": "Who speaks when", "front_hint": "Capture speaker turns clearly.", "definition": "Recording and labeling the order, timing, and speaker identity of conversational turns.", "target": "Clarify annotation and capture strategy.", "memory": "Conversation is timing, not just words.", "avoid": "Do not ignore pauses, interruptions, and speaker changes."}, {"category": "Conversational / Multimodal", "term": "Overlapping Speech", "subtitle": "People talking at the same time", "front_hint": "Allowed or not allowed?", "definition": "Speech overlap happens when two or more speakers talk simultaneously.", "target": "Decide whether overlap is allowed and how it is labeled.", "memory": "Overlap is useful but messy.", "avoid": "Do not mix speakers without a plan."}, {"category": "Conversational / Multimodal", "term": "Far-field Data", "subtitle": "Room microphone audio", "front_hint": "Audio from farther away.", "definition": "Speech recorded with a microphone farther from the speaker, capturing more room sound.", "target": "Useful if you want robustness to real rooms.", "memory": "Close mic teaches clean voice; far-field teaches real-world conditions.", "avoid": "Do not mix close and far-field data without labels."}, {"category": "Conversational / Multimodal", "term": "Isolated Speaker Channels", "subtitle": "One mic/channel per speaker", "front_hint": "Separate voices for clean training.", "definition": "Recording each speaker on a separate channel or microphone to make diarization and training easier.", "target": "Recommended for conversational data.", "memory": "Separate channels = easier speaker separation.", "avoid": "A single mixed track can limit future use."}];
+    let index = 0;
+
+    const els = {
+      card: document.getElementById('card'),
+      frontCategory: document.getElementById('frontCategory'),
+      backCategory: document.getElementById('backCategory'),
+      frontTerm: document.getElementById('frontTerm'),
+      backTerm: document.getElementById('backTerm'),
+      frontSubtitle: document.getElementById('frontSubtitle'),
+      frontHint: document.getElementById('frontHint'),
+      definition: document.getElementById('definition'),
+      target: document.getElementById('target'),
+      memory: document.getElementById('memory'),
+      avoid: document.getElementById('avoid'),
+      prev: document.getElementById('prev'),
+      next: document.getElementById('next'),
+      counter: document.getElementById('counter'),
+      progress: document.getElementById('progress'),
+      total: document.getElementById('total')
+    };
+
+    function render() {
+      const c = CARDS[index];
+      els.frontCategory.textContent = c.category;
+      els.backCategory.textContent = c.category;
+      els.frontTerm.textContent = c.term;
+      els.backTerm.textContent = c.term;
+      els.frontSubtitle.textContent = c.subtitle;
+      els.frontHint.textContent = c.front_hint;
+      els.definition.textContent = c.definition;
+      els.target.textContent = c.target;
+      els.memory.textContent = c.memory;
+      els.avoid.textContent = c.avoid;
+      els.counter.textContent = `${index + 1} / ${CARDS.length}`;
+      els.progress.textContent = index + 1;
+      els.total.textContent = CARDS.length;
+      els.card.classList.remove('flipped');
+    }
+
+    function nextCard() {
+      index = (index + 1) % CARDS.length;
+      render();
+    }
+
+    function prevCard() {
+      index = (index - 1 + CARDS.length) % CARDS.length;
+      render();
+    }
+
+    els.card.addEventListener('click', () => {
+      els.card.classList.toggle('flipped');
+    });
+
+    els.next.addEventListener('click', nextCard);
+    els.prev.addEventListener('click', prevCard);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextCard();
+      if (e.key === 'ArrowLeft') prevCard();
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        els.card.classList.toggle('flipped');
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
